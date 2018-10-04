@@ -26,6 +26,8 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import ja.burhanrashid52.photoeditor.PhotoFilter;
+
 public class MainActivity extends AppCompatActivity {
 
     private static String TAG = "PermissionDemo";
@@ -47,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
         if (!hasCamera()) {
             recordButton.setEnabled(false);
         }
+
     }
 
     public void onClick(View v) {
@@ -115,6 +118,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
             getData(mCurrentPhotoPath);
+            Intent i = new Intent(this, EditPhoto.class);
+            i.putExtra("photoPath",mCurrentPhotoPath);
+            startActivity(i);
             ImageView mImageView = (ImageView) findViewById(R.id.imageView);
             mImageView.setImageURI(Uri.parse(mCurrentPhotoPath));
         }
