@@ -1,7 +1,6 @@
 package com.example.sangbn.homework_4;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -9,8 +8,6 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.app.Activity;
 import android.support.v4.app.ActivityCompat;
-import android.util.Log;
-import android.widget.TextView;
 
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
@@ -21,10 +18,10 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 
-public class MapBox extends Activity{
+public class MapBox extends Activity {
     private MapView mapView;
-    private float longitude = 0;
-    private float latitude = 0;
+    private float longitude = 0.00f;
+    private float latitude = 0.00f;
     LocationManager mLocationManager;
 
     @Override
@@ -49,10 +46,12 @@ public class MapBox extends Activity{
             // TODO: Consider calling
             return;
         }
+        //find location with Network
         mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, mLocationListener);
-
-        System.out.println("latitute"+ latitude);
-        System.out.println("longtitute"+ longitude);
+        //find location with GPS -- not available
+//        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, mLocationListener);
+        System.out.println("latitute" + latitude);
+        System.out.println("longtitute" + longitude);
 
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
@@ -60,15 +59,15 @@ public class MapBox extends Activity{
                 // One way to add a marker view
                 mapboxMap.addMarker(new MarkerOptions()
                         .position(new LatLng(latitude, longitude))
-                        .title("")
-                        .snippet("")
                 );
+                // Camera position
                 CameraPosition position = new CameraPosition.Builder()
                         .target(new LatLng(latitude, longitude)) // Sets the new camera position
                         .zoom(18) // Sets the zoom to level 10
                         .tilt(20) // Set the camera tilt to 20 degrees
                         .build(); // Builds the CameraPosition object from the builder
-                mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), 500);
+                // Animate Camera -- 5000ms
+                mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), 5000);
             }
         });
     }
@@ -76,9 +75,11 @@ public class MapBox extends Activity{
     private final LocationListener mLocationListener = new LocationListener() {
         @Override
         public void onLocationChanged(final Location location) {
-            //your code here
-//            latitude = (float) location.getLatitude();
-//            longitude = (float) location.getLongitude();
+            // Get location Onchange
+            if (latitude != 0 && longitude != 0) {
+                latitude = (float) location.getLatitude();
+                longitude = (float) location.getLongitude();
+            }
         }
 
         @Override

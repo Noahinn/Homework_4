@@ -1,8 +1,10 @@
 package com.example.sangbn.homework_4;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.media.ExifInterface;
 import android.net.Uri;
@@ -14,7 +16,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,8 +29,11 @@ import android.support.v4.app.ActivityCompat;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import ja.burhanrashid52.photoeditor.PhotoFilter;
 
@@ -35,6 +44,9 @@ public class MainActivity extends AppCompatActivity {
     static final int REQUEST_TAKE_PHOTO = 1;
     private static String mCurrentPhotoPath;
     public static int rotation = 0;
+
+    GridView androidGridView;
+    List<String> imageURL = new ArrayList<>();
 
     // your Final lat Long Values
     Float Latitude = 0.0f;
@@ -47,11 +59,96 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Button recordButton = (Button) findViewById(R.id.button);
         setupPermissions();
+        int permission = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (permission == PackageManager.PERMISSION_GRANTED) {
+            getImages();
+        }
         if (!hasCamera()) {
             recordButton.setEnabled(false);
         }
+
+
+        androidGridView = (GridView) findViewById(R.id.Grid);
+        androidGridView.setAdapter(new ImageAdapterGridView(this));
+
+        androidGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent,
+                                    View v, int position, long id) {
+                Toast.makeText(getBaseContext(), "Grid Item " + (position + 1) + " Selected", Toast.LENGTH_LONG).show();
+            }
+        });
+
+
     }
 
+    public class ImageAdapterGridView extends BaseAdapter {
+        private Context mContext;
+
+        public ImageAdapterGridView(Context c) {
+            mContext = c;
+        }
+
+        public int getCount() {
+            return imageURL.size();
+        }
+
+        public Object getItem(int position) {
+            return null;
+        }
+
+        public long getItemId(int position) {
+            return 0;
+        }
+
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ImageView mImageView;
+
+            if (convertView == null) {
+                mImageView = new ImageView(mContext);
+                mImageView.setLayoutParams(new GridView.LayoutParams(130, 130));
+                mImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                mImageView.setPadding(16, 16, 16, 16);
+            } else {
+                mImageView = (ImageView) convertView;
+            }
+
+
+            System.out.println("Position: " + position);
+            System.out.println("HMMMMMM " + imageURL.get(position));
+//            mImageView.setImageResource(imageURL.get(position));
+            mImageView.setImageURI(Uri.parse(imageURL.get(position)));
+            return mImageView;
+        }
+    }
+
+    private void getImages() {
+        final String[] columns = {MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID};
+        System.out.println(MediaStore.Images.Media.DATA);
+        System.out.println(MediaStore.Images.Media._ID);
+        final String orderBy = MediaStore.Images.Media._ID;
+        //Stores all the images from the gallery in Cursor
+        Uri imageUri = Uri.parse("content://media/DCIM/images/media");
+        Cursor cursor = getContentResolver().query(imageUri, columns, null,
+                null, orderBy);
+        System.out.println("HAHAHAHAHHA " + MediaStore.Images.Media.getContentUri("Musics"));
+        //Total number of images
+        int count = cursor.getCount();
+        //Create an array to store path to all the images
+        String[] arrPath = new String[count];
+
+        for (int i = 0; i < count; i++) {
+            cursor.moveToPosition(i);
+            int dataColumnIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
+            //Store the path of the image
+            arrPath[i] = cursor.getString(dataColumnIndex);
+            Log.i("PATH", arrPath[i]);
+            imageURL.add(arrPath[i]);
+            System.out.println(arrPath[i]);
+        }
+        // The cursor should be freed up after use with close()
+        cursor.close();
+    }
 
     public void onClick(View v) {
         dispatchTakePictureIntent();
@@ -74,8 +171,15 @@ public class MainActivity extends AppCompatActivity {
         if (permission != PackageManager.PERMISSION_GRANTED) {
             makeRequest();
         }
+        //
         permission = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_COARSE_LOCATION);
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            makeRequest();
+        }
+        //
+        permission = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE);
         if (permission != PackageManager.PERMISSION_GRANTED) {
             makeRequest();
         }
@@ -86,7 +190,8 @@ public class MainActivity extends AppCompatActivity {
                 new String[]{
                         Manifest.permission.WRITE_EXTERNAL_STORAGE,
                         Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION},
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.READ_EXTERNAL_STORAGE},
                 RECORD_REQUEST_CODE);
     }
 
@@ -151,6 +256,7 @@ public class MainActivity extends AppCompatActivity {
                         PackageManager.PERMISSION_GRANTED) {
                     Log.i(TAG, "Permission has been denied by user");
                 } else {
+                    getImages();
                     Log.i(TAG, "Permission has been granted by user");
                 }
             }

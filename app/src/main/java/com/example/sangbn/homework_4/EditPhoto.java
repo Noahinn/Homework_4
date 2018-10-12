@@ -35,8 +35,8 @@ public class EditPhoto extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_photo);
+        // Get extras from Main
         Bundle extras = getIntent().getExtras();
-
         if (extras != null) {
             photoPath = extras.getString("photoPath");
             Longitude = extras.getFloat("longitude");
@@ -44,7 +44,6 @@ public class EditPhoto extends AppCompatActivity {
         }
         PhotoEditorView mPhotoEditorView = findViewById(R.id.photoEditorView);
         mPhotoEditorView.getSource().setImageURI(Uri.parse(photoPath));
-
         mPhotoEditor = new PhotoEditor.Builder(this, mPhotoEditorView)
                 .setPinchTextScalable(true)
                 .build();
@@ -99,6 +98,7 @@ public class EditPhoto extends AppCompatActivity {
 
     }
 
+    // Save photo edited
     public void save(View v) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -110,6 +110,7 @@ public class EditPhoto extends AppCompatActivity {
             public void onSuccess(@NonNull String imagePath) {
                 PhotoEditorView mPhotoEditorView = findViewById(R.id.photoEditorView);
                 mPhotoEditorView.getSource().setImageResource(0);
+//                System.out.println("IMAGE " + imagePath);
                 mPhotoEditorView.getSource().setImageURI(Uri.parse(imagePath));
                 Log.e("PhotoEditor", "Image Saved Successfully");
             }
@@ -121,6 +122,7 @@ public class EditPhoto extends AppCompatActivity {
         });
     }
 
+    // start Activity MapBox, put latitude && longtitude.
     public void viewMap(View v) {
         Intent i = new Intent(this, MapBox.class);
         i.putExtra("latitude", Latitude);
