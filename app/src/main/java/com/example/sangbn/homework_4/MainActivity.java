@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     Float Latitude = 0.0f;
     Float Longitude = 0.0f;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
             recordButton.setEnabled(false);
         }
     }
+
 
     public void onClick(View v) {
         dispatchTakePictureIntent();
@@ -64,15 +66,28 @@ public class MainActivity extends AppCompatActivity {
         int permission = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE);
         if (permission != PackageManager.PERMISSION_GRANTED) {
-            Log.i(TAG, "Permission to record denied");
             makeRequest();
-        } else {
+        }
+        //-----------------
+        permission = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION);
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            makeRequest();
+        }
+        permission = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION);
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            makeRequest();
         }
     }
 
     protected void makeRequest() {
         ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, RECORD_REQUEST_CODE);
+                new String[]{
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION},
+                RECORD_REQUEST_CODE);
     }
 
     private void dispatchTakePictureIntent() {
@@ -118,7 +133,9 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
             getData(mCurrentPhotoPath);
             Intent i = new Intent(this, EditPhoto.class);
-            i.putExtra("photoPath",mCurrentPhotoPath);
+            i.putExtra("photoPath", mCurrentPhotoPath);
+            i.putExtra("latitude", Latitude);
+            i.putExtra("longitude", Longitude);
             startActivity(i);
             ImageView mImageView = (ImageView) findViewById(R.id.imageView);
             mImageView.setImageURI(Uri.parse(mCurrentPhotoPath));

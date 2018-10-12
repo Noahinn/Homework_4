@@ -1,6 +1,7 @@
 package com.example.sangbn.homework_4;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.media.effect.EffectFactory;
@@ -26,6 +27,9 @@ public class EditPhoto extends AppCompatActivity {
 
     public PhotoEditor mPhotoEditor = null;
     public String photoPath = "";
+    Float Latitude = 0.0f;
+    Float Longitude = 0.0f;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -35,6 +39,8 @@ public class EditPhoto extends AppCompatActivity {
 
         if (extras != null) {
             photoPath = extras.getString("photoPath");
+            Longitude = extras.getFloat("longitude");
+            Latitude = extras.getFloat("latitude");
         }
         PhotoEditorView mPhotoEditorView = findViewById(R.id.photoEditorView);
         mPhotoEditorView.getSource().setImageURI(Uri.parse(photoPath));
@@ -88,7 +94,6 @@ public class EditPhoto extends AppCompatActivity {
             linearLayout2.setOrientation(LinearLayout.VERTICAL);
             linearLayout2.addView(text);
             linearLayout2.addView(image);
-
             linearLayout1.addView(linearLayout2);
         }
 
@@ -107,7 +112,6 @@ public class EditPhoto extends AppCompatActivity {
                 mPhotoEditorView.getSource().setImageResource(0);
                 mPhotoEditorView.getSource().setImageURI(Uri.parse(imagePath));
                 Log.e("PhotoEditor", "Image Saved Successfully");
-
             }
 
             @Override
@@ -115,5 +119,12 @@ public class EditPhoto extends AppCompatActivity {
                 Log.e("PhotoEditor", "Failed to save Image");
             }
         });
+    }
+
+    public void viewMap(View v) {
+        Intent i = new Intent(this, MapBox.class);
+        i.putExtra("latitude", Latitude);
+        i.putExtra("longitude", Longitude);
+        startActivity(i);
     }
 }
