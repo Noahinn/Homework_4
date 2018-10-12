@@ -49,7 +49,6 @@ public class MainActivity extends AppCompatActivity {
         if (!hasCamera()) {
             recordButton.setEnabled(false);
         }
-
     }
 
     public void onClick(View v) {
